@@ -9,6 +9,11 @@ import { NavMenuComponent } from './nav-menu/nav-menu.component';
 import { HomeComponent } from './home/home.component';
 import { CounterComponent } from './counter/counter.component';
 import { FetchDataComponent } from './fetch-data/fetch-data.component';
+import { CameraComponent } from './camera/camera.component';
+import { ParticipantsComponent } from './participants/participants.component';
+import { RoomsComponent } from './rooms/rooms.component';
+import { SettingsComponent } from './settings/settings.component';
+import { DeviceSelectComponent } from './settings/device-select.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +21,12 @@ import { FetchDataComponent } from './fetch-data/fetch-data.component';
     NavMenuComponent,
     HomeComponent,
     CounterComponent,
-    FetchDataComponent
+    FetchDataComponent,
+    CameraComponent,
+    ParticipantsComponent,
+    RoomsComponent,
+    SettingsComponent,
+    DeviceSelectComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
