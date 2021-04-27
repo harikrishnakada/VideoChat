@@ -22,22 +22,25 @@ The RoomsComponent expects a room name and an array of LocalTrack objects. These
 export class RoomsComponent implements OnInit {
 
   @Output() roomChanged = new EventEmitter<string>();
+  @Output() roomJoined = new EventEmitter<NamedRoom>();
   @Input() activeRoomName: string;
 
   roomName: string;
-  rooms: NamedRoom[];
+  roomToJoin: string;
+  rooms: NamedRoom[] = [];
 
   private subscription: Subscription;
 
+  componentId = Date.now();
   constructor(
     private readonly videoChatService: VideoChatService) { }
 
   async ngOnInit() {
-    await this.updateRooms();
+    //  await this.updateRooms();
     this.subscription =
       this.videoChatService
         .$roomsUpdated
-        .pipe(tap(_ => this.updateRooms()))
+        .pipe(tap(room => this.updateRoom(room.sid)))
         .subscribe();
   }
 
@@ -58,12 +61,29 @@ export class RoomsComponent implements OnInit {
     this.roomChanged.emit(roomName);
   }
 
-  onJoinRoom(roomName: string) {
-    this.roomChanged.emit(roomName);
+  async onJoinRoom(roomSid: string) {
+    await this.updateRoom(roomSid);
+    if (this.rooms.find(x => x.id == roomSid) != null) {
+      this.roomToJoin = null
+      this.roomJoined.emit(this.rooms.find(x => x.id == roomSid));
+    }
   }
 
   async updateRooms() {
     this.rooms = (await this.videoChatService.getAllRooms()) as NamedRoom[];
   }
 
+  async updateRoom(roomSid) {
+    var room = (await this.videoChatService.getRoom(roomSid)) as NamedRoom[];
+    this.rooms = room;
+  }
+
+  copyToClipboard(room: NamedRoom) {
+    var textArea = document.createElement("textarea");
+    textArea.value = room.id;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("Copy");
+    textArea.remove();
+  }
 }

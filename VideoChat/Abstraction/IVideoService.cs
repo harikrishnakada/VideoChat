@@ -10,6 +10,6 @@ namespace VideoChat.Abstraction
     public interface IVideoService
     {
         string GetTwilioJwt(string identity);
-        Task<IEnumerable<RoomDetails>> GetAllRoomsAsync();
+        Task<IEnumerable<RoomDetails>> GetAllRoomsAsync(string roomSid = null);
     }
 }

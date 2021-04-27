@@ -1,5 +1,6 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
-import { Participant, RemoteAudioTrack, RemoteParticipant, RemoteTrack, RemoteTrackPublication, RemoteVideoTrack } from 'twilio-video';
+import { Participant, RemoteAudioTrack, RemoteParticipant, RemoteTrack, RemoteTrackPublication, RemoteVideoTrack, Track } from 'twilio-video';
+import { VideoChatService } from '../services/videochat.service';
 
 /*
  A ParticipantComponent also extends an EventEmitter and offers its own set of valuable events. Between the room, participant, publication, and track, there is a complete set of events to handle when participants join or leave a room. When participants join, an event fires and provides publication details of their tracks so the application can render their audio and video to the user interface DOM of each client as the tracks become available.
@@ -13,7 +14,7 @@ Much like the CameraComponent, the audio and video elements associated with a pa
   styleUrls: ['./participants.component.css']
 })
 export class ParticipantsComponent implements OnInit {
-  @ViewChild('list', {static: false}) listRef: ElementRef;
+  @ViewChild('list', { static: false }) listRef: ElementRef;
   @Output('participantsChanged') participantsChanged = new EventEmitter<boolean>();
   @Output('leaveRoom') leaveRoom = new EventEmitter<boolean>();
   @Input('activeRoomName') activeRoomName: string;
@@ -29,7 +30,7 @@ export class ParticipantsComponent implements OnInit {
   private participants: Map<Participant.SID, RemoteParticipant>;
   private dominantSpeaker: RemoteParticipant;
 
-  constructor(private readonly renderer: Renderer2) { }
+  constructor(private readonly renderer: Renderer2, private readonly videoChatService: VideoChatService) { }
 
   ngOnInit() {
   }
@@ -70,8 +71,8 @@ export class ParticipantsComponent implements OnInit {
 
   private registerParticipantEvents(participant: RemoteParticipant) {
     if (participant) {
-      participant.tracks.forEach(publication => this.subscribe(publication));
-      participant.on('trackPublished', publication => this.subscribe(publication));
+      participant.tracks.forEach(publication => this.subscribe(publication, participant));
+      participant.on('trackPublished', publication => this.subscribe(publication, participant));
       participant.on('trackUnpublished',
         publication => {
           if (publication && publication.track) {
@@ -81,9 +82,64 @@ export class ParticipantsComponent implements OnInit {
     }
   }
 
-  private subscribe(publication: RemoteTrackPublication | any) {
+  private subscribe(publication: RemoteTrackPublication, participant: RemoteParticipant) {
     if (publication && publication.on) {
-      publication.on('subscribed', track => this.attachRemoteTrack(track));
+      publication.on('subscribed', track => {
+        this.attachRemoteTrack(track);
+        track.on('enabled', t => {
+          console.log(t.isEnabled + t.kind + participant.sid);
+          const id = `${t.kind}-info-participant-${participant.sid}`;
+          let element = document.getElementById(id);
+          if (element != null) {
+            if (t.kind == 'audio')
+              element.innerHTML = `<span class="fa fa-microphone icon-medium"></span>`;
+            else if (t.kind == 'video')
+              element.innerHTML = `<span class="fa fa-video icon-medium"></span>`;
+          } else {
+            element = document.createElement('div');
+            element.id = id;
+            if (t.kind == 'audio') {
+              element.innerHTML = `<span class="fa fa-microphone icon-medium"></span> `;
+              this.renderer.setStyle(element, 'margin-left', '50px');
+            }
+            else if (t.kind == 'video') {
+              element.innerHTML = `<span class="fa fa-video icon-medium"></span>`;
+              this.renderer.setStyle(element, 'margin-left', '20px');
+            }
+            this.renderer.setStyle(element, 'position', 'absolute');
+            this.renderer.setStyle(element, 'margin-top', '-40px');
+
+            this.renderer.appendChild(this.listRef.nativeElement, element);
+          }
+
+        })
+        track.on('disabled', t => {
+          console.log(t.isEnabled + t.kind + participant.sid);
+          const id = `${t.kind}-info-participant-${participant.sid}`;
+          let element = document.getElementById(id);
+          if (element != null) {
+            if (t.kind == 'audio')
+              element.innerHTML = `<span class="fa fa-microphone-slash icon-medium"></span>`;
+            else if (t.kind == 'video')
+              element.innerHTML = `<span class="fa fa-video-slash icon-medium"></span>`;
+          } else {
+            element = document.createElement('div');
+            element.id = id;
+            if (t.kind == 'audio') {
+              element.innerHTML = `<span class="fa fa-microphone-slash icon-medium"></span> `;
+              this.renderer.setStyle(element, 'margin-left', '50px');
+            }
+            else if (t.kind == 'video') {
+              element.innerHTML = `<span class="fa fa-video-slash icon-medium"></span>`;
+              this.renderer.setStyle(element, 'margin-left', '20px');
+            }
+            this.renderer.setStyle(element, 'position', 'absolute');
+            this.renderer.setStyle(element, 'margin-top', '-40px');
+
+            this.renderer.appendChild(this.listRef.nativeElement, element);
+          }
+        })
+      });
       publication.on('unsubscribed', track => this.detachRemoteTrack(track));
     }
   }

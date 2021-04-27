@@ -4,6 +4,7 @@ import { DeviceSelectComponent } from './device-select.component';
 import { DeviceService } from '../services/device.service';
 import { debounceTime } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { Room } from 'twilio-video';
 
 /**
  There are a few components in play with the concept of settings. We’ll have a camera component beneath several DeviceSelectComponents objects.
@@ -15,7 +16,7 @@ The SettingsComponent object gets all the available devices and binds them to th
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.css']
 })
-export class SettingsComponent implements OnInit, OnDestroy  {
+export class SettingsComponent implements OnInit, OnDestroy {
   private devices: MediaDeviceInfo[] = [];
   private subscription: Subscription;
   private videoDeviceId: string;
@@ -30,10 +31,11 @@ export class SettingsComponent implements OnInit, OnDestroy  {
     return this.devices && this.devices.filter(d => d.kind === 'videoinput').length > 0;
   }
 
-  @ViewChild('camera', {static:false}) camera: CameraComponent;
+  @ViewChild('camera', { static: false }) camera: CameraComponent;
   @ViewChild('videoSelect', { static: false }) video: DeviceSelectComponent;
 
   @Input('isPreviewing') isPreviewing: boolean;
+  @Input() activeRoom: Room;
   @Output() settingsChanged = new EventEmitter<MediaDeviceInfo>();
 
   constructor(private readonly deviceService: DeviceService) { }
@@ -66,11 +68,9 @@ export class SettingsComponent implements OnInit, OnDestroy  {
   async showPreviewCamera() {
     this.isPreviewing = true;
 
-    if (this.videoDeviceId !== this.video.selectedId) {
-      this.videoDeviceId = this.video.selectedId;
-      const videoDevice = this.devices.find(d => d.deviceId === this.video.selectedId);
-      await this.camera.initializePreview(videoDevice);
-    }
+    this.videoDeviceId = this.video.selectedId;
+    const videoDevice = this.devices.find(d => d.deviceId === this.video.selectedId);
+    await this.camera.initializePreview(videoDevice);
 
     return this.camera.tracks;
   }
@@ -92,5 +92,47 @@ export class SettingsComponent implements OnInit, OnDestroy  {
         }
       }
     }
+  }
+
+  onVideoSettingChanged(event) {
+    if (event)
+      this.startVideo()
+    else
+      this.stopVideo();
+  }
+
+  stopVideo() {
+    if (this.activeRoom)
+      this.activeRoom.localParticipant.videoTracks.forEach(track => {
+        track.track.disable();
+      });
+  }
+
+  startVideo() {
+    if (this.activeRoom)
+      this.activeRoom.localParticipant.videoTracks.forEach(track => {
+        track.track.enable();
+      });
+  }
+
+  onAudioSettingChanged(event) {
+    if (event)
+      this.startAudio()
+    else
+      this.stopAudio();
+  }
+
+  stopAudio() {
+    if (this.activeRoom)
+      this.activeRoom.localParticipant.audioTracks.forEach(track => {
+        track.track.disable();
+      });
+  }
+
+  startAudio() {
+    if (this.activeRoom)
+      this.activeRoom.localParticipant.audioTracks.forEach(track => {
+        track.track.enable();
+      });
   }
 }

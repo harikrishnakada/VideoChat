@@ -2,3 +2,13 @@
 <div id="preview" #preview>
   <div *ngIf="isInitializing">Loading preview... Please wait.</div>
 </div>
+<div class="row camera-actions">
+  <div *ngIf="videoTrack && videoTrack.isStarted">
+    <a href="javascript:void(0)" role="button" (click)="stopVideo()" *ngIf="videoTrack.isEnabled"><span class="fa fa-video large-icon"></span></a>
+    <a href="javascript:void(0)" role="button" (click)="startVideo()" *ngIf="!videoTrack.isEnabled"><span class="fa fa-video-slash large-icon"></span></a>
+  </div>
+  <div *ngIf="audioTrack && audioTrack.isStarted">
+    <a href="javascript:void(0)" role="button" (click)="stopAudio()" *ngIf="audioTrack.isEnabled"><span class="fa fa-microphone large-icon"></span></a>
+    <a href="javascript:void(0)" class="btn-default" (click)="startAudio()" *ngIf="!audioTrack.isEnabled"><span class="fa fa-microphone-slash large-icon"></span></a>
+  </div>
+</div>

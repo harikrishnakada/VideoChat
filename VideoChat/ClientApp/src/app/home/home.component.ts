@@ -1,10 +1,10 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
-import { LocalAudioTrack, LocalTrack, LocalVideoTrack, RemoteParticipant, Room } from 'twilio-video';
+import { createLocalAudioTrack, LocalAudioTrack, LocalTrack, LocalVideoTrack, RemoteParticipant, Room } from 'twilio-video';
 import { CameraComponent } from '../camera/camera.component';
 import { ParticipantsComponent } from '../participants/participants.component';
 import { RoomsComponent } from '../rooms/rooms.component';
-import { VideoChatService } from '../services/videochat.service';
+import { NamedRoom, VideoChatService } from '../services/videochat.service';
 import { SettingsComponent } from '../settings/settings.component';
 
 @Component({
@@ -12,8 +12,8 @@ import { SettingsComponent } from '../settings/settings.component';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit, OnDestroy  {
-  @ViewChild('rooms', {static: false}) rooms: RoomsComponent;
+export class HomeComponent implements OnInit, OnDestroy {
+  @ViewChild('rooms', { static: false }) rooms: RoomsComponent;
   @ViewChild('camera', { static: false }) camera: CameraComponent;
   @ViewChild('settings', { static: false }) settings: SettingsComponent;
   @ViewChild('participants', { static: false }) participants: ParticipantsComponent;
@@ -21,23 +21,24 @@ export class HomeComponent implements OnInit, OnDestroy  {
   activeRoom: Room;
 
   private notificationHub: HubConnection;
+  roomId: string;
 
   constructor(
     private readonly videoChatService: VideoChatService) { }
 
   async ngOnInit() {
-    const builder =
-      new HubConnectionBuilder()
-        .configureLogging(LogLevel.Information)
-        .withUrl(`${location.origin}/notificationHub`);
-
-    this.notificationHub = builder.build();
-    this.notificationHub.on('RoomsUpdated', async updated => {
-      if (updated) {
+    this.videoChatService.createHub();
+    this.notificationHub = this.videoChatService.notificationHub
+    this.notificationHub.on('RoomsUpdated', async (roomSid, updated) => {
+      console.log("RoomsUpdated");
+      if (roomSid != null && updated) {
+        await this.rooms.updateRoom(roomSid);
+      }
+      else if (updated) {
         await this.rooms.updateRooms();
       }
     });
-    await this.notificationHub.start();
+
   }
 
   ngOnDestroy() {
@@ -50,6 +51,7 @@ export class HomeComponent implements OnInit, OnDestroy  {
 
   async onLeaveRoom(_: boolean) {
     if (this.activeRoom) {
+      this.rooms.rooms.splice(this.rooms.rooms.findIndex(x => x.id == this.activeRoom.sid), 1)
       this.activeRoom.disconnect();
       this.activeRoom = null;
     }
@@ -62,27 +64,38 @@ export class HomeComponent implements OnInit, OnDestroy  {
   }
 
   async onRoomChanged(roomName: string) {
-    if (roomName) {
-      if (this.activeRoom) {
-        this.activeRoom.disconnect();
-      }
+    if (roomName)
+      await this.initializeRoom(roomName);
+  }
 
-      this.camera.finalizePreview();
-      const tracks = await this.settings.showPreviewCamera();
+  async onRoomJoined(room: NamedRoom) {
+    if (room && room.name)
+      await this.initializeRoom(room.name);
+  }
 
-      this.activeRoom =
-        await this.videoChatService
-          .joinOrCreateRoom(roomName, tracks);
-
-      this.participants.initialize(this.activeRoom.participants);
-      this.registerRoomEvents();
-
-      this.notificationHub.send('RoomsUpdated', true);
+  private async initializeRoom(roomName: string) {
+    if (this.activeRoom) {
+      this.activeRoom.disconnect();
     }
+
+    this.camera.finalizePreview();
+    const tracks = await this.settings.showPreviewCamera();
+
+    this.activeRoom =
+      await this.videoChatService
+        .joinOrCreateRoom(roomName, tracks);
+
+    this.participants.initialize(this.activeRoom.participants);
+    this.registerRoomEvents();
+
+    this.settings.activeRoom = this.activeRoom;
+    this.camera.activeRoom = this.activeRoom;
+
+    this.notificationHub.invoke('JoinRoom', this.activeRoom.sid);
   }
 
   onParticipantsChanged(_: boolean) {
-    this.videoChatService.nudge();
+    this.videoChatService.nudge(this.activeRoom);
   }
 
   private registerRoomEvents() {
@@ -108,5 +121,4 @@ export class HomeComponent implements OnInit, OnDestroy  {
       && ((track as LocalAudioTrack).detach !== undefined
         || (track as LocalVideoTrack).detach !== undefined);
   }
-
 }

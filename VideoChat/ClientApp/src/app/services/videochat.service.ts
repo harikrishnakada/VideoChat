@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HubConnection, HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
 import { Observable, ReplaySubject } from 'rxjs';
 import { connect, ConnectOptions, LocalTrack, Room } from 'twilio-video';
 
@@ -23,11 +24,23 @@ Notice that the retrieval of the Twilio JWT is marked private The getAuthToken m
   providedIn: 'root'
 })
 export class VideoChatService {
-  $roomsUpdated: Observable<boolean>;
-  private roomBroadcast = new ReplaySubject<boolean>();
+  $roomsUpdated: Observable<Room>;
+  private roomBroadcast = new ReplaySubject<Room>();
+
+  notificationHub: HubConnection;
 
   constructor(private readonly http: HttpClient) {
     this.$roomsUpdated = this.roomBroadcast.asObservable();
+  }
+
+  async createHub() {
+    const builder =
+      new HubConnectionBuilder()
+        .configureLogging(LogLevel.Information)
+        .withUrl(`${location.origin}/notificationHub`);
+
+    this.notificationHub = builder.build();
+    await this.notificationHub.start();
   }
 
   private async getAuthToken() {
@@ -42,6 +55,12 @@ export class VideoChatService {
   getAllRooms() {
     return this.http
       .get<Rooms>('api/video/rooms')
+      .toPromise();
+  }
+
+  getRoom(roomSid) {
+    return this.http
+      .get<Rooms>('api/video/room/' + roomSid)
       .toPromise();
   }
 
@@ -60,15 +79,15 @@ export class VideoChatService {
       console.error(`Unable to connect to Room: ${error.message}`);
     } finally {
       if (room) {
-        this.roomBroadcast.next(true);
+        this.roomBroadcast.next(room);
       }
     }
 
     return room;
   }
 
-  nudge() {
-    this.roomBroadcast.next(true);
+  nudge(activeRoom) {
+    this.roomBroadcast.next(activeRoom);
   }
 
 }

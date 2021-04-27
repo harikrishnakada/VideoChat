@@ -25,5 +25,9 @@ namespace VideoChat.Controllers
         [HttpGet("rooms")]
         public async Task<IActionResult> GetRooms()
             => new JsonResult(await _videoService.GetAllRoomsAsync());
+
+        [HttpGet("room/{roomSid}")]
+        public async Task<IActionResult> GetRoom(string roomSid)
+           => new JsonResult(await _videoService.GetAllRoomsAsync(roomSid));
     }
 }

@@ -12,7 +12,10 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "TWILIO_ACCOUNT_SID": "AC62f2d2faa61d3c5e08d6cdb48cb663d2",
+        "TWILIO_API_SECRET": "drAjxsZ9RW1py8pJQNVlD3eownUw1yiC",
+        "TWILIO_API_KEY": "SKf5b757be6c1df961602d3148ceec84a8"
       }
     },
     "VideoChat": {

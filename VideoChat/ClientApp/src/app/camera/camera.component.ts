@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { createLocalTracks, LocalTrack, LocalVideoTrack } from 'twilio-video';
+import { AfterViewInit, Component, ElementRef, EventEmitter, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
+import { createLocalTracks, LocalAudioTrack, LocalTrack, LocalVideoTrack, Room } from 'twilio-video';
 
 /*
  In addition to providing audio and video tracks for room participants to share, the CameraComponent also displays a local camera preview. By rendering locally-created audio and video tracks to the DOM as the <app-camera> element. The Twilio Programmable Video JavaScript Platform SDK, imported from  twilio-video, provides an easy-to-use API for creating and managing the local tracks.
@@ -15,16 +15,21 @@ Once the tracks are created, the code finds the video track and appends it to th
 })
 export class CameraComponent implements OnInit, AfterViewInit {
   @ViewChild('preview', { static: false }) previewElement: ElementRef;
+  @Output() isVideoOn = new EventEmitter<boolean>();
+  @Output() isAudioOn = new EventEmitter<boolean>();
 
   get tracks(): LocalTrack[] {
     return this.localTracks;
   }
 
   isInitializing: boolean = true;
+  activeRoom: Room;
 
   private videoTrack: LocalVideoTrack;
+  private audioTrack: LocalAudioTrack;
   private localTracks: LocalTrack[] = [];
 
+  componentId = Date.now();
   constructor(private readonly renderer: Renderer2) { }
 
   ngOnInit() {
@@ -65,6 +70,7 @@ export class CameraComponent implements OnInit, AfterViewInit {
         : await this.initializeTracks();
 
       this.videoTrack = this.localTracks.find(t => t.kind === 'video') as LocalVideoTrack;
+      this.audioTrack = this.localTracks.find(t => t.kind === 'audio') as LocalAudioTrack;
       const videoElement = this.videoTrack.attach();
       this.renderer.setStyle(videoElement, 'height', '100%');
       this.renderer.setStyle(videoElement, 'width', '100%');
@@ -86,6 +92,28 @@ export class CameraComponent implements OnInit, AfterViewInit {
 
     return createLocalTracks({ audio: true, video: true });
 
+  }
+
+  stopVideo() {
+    this.videoTrack.disable();
+    this.isVideoOn.emit(false);
+
+  }
+
+  startVideo() {
+    this.videoTrack.enable();
+    this.isVideoOn.emit(true);
+
+  }
+
+  stopAudio() {
+    this.audioTrack.disable();
+    this.isAudioOn.emit(false);
+  }
+
+  startAudio() {
+    this.audioTrack.enable();
+    this.isAudioOn.emit(true);
   }
 
 }

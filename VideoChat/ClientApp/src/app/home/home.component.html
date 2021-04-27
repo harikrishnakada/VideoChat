@@ -6,7 +6,7 @@
     </a>
   </div>
   <div class="grid-left">
-    <app-rooms #rooms (roomChanged)="onRoomChanged($event)"
+    <app-rooms #rooms (roomChanged)="onRoomChanged($event)" (roomJoined)="onRoomJoined($event)"
                [activeRoomName]="!!activeRoom ? activeRoom.name : null"></app-rooms>
   </div>
   <div class="grid-content">
