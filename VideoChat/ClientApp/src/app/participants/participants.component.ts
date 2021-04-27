@@ -91,18 +91,18 @@ export class ParticipantsComponent implements OnInit {
           const id = `${t.kind}-info-participant-${participant.sid}`;
           let element = document.getElementById(id);
           if (element != null) {
-            if (t.kind == 'audio')
+            if ((t as any).kind == 'audio')
               element.innerHTML = `<span class="fa fa-microphone icon-medium"></span>`;
-            else if (t.kind == 'video')
+            else if ((t as any).kind == 'video')
               element.innerHTML = `<span class="fa fa-video icon-medium"></span>`;
           } else {
             element = document.createElement('div');
             element.id = id;
-            if (t.kind == 'audio') {
+            if ((t as any).kind == 'audio') {
               element.innerHTML = `<span class="fa fa-microphone icon-medium"></span> `;
               this.renderer.setStyle(element, 'margin-left', '50px');
             }
-            else if (t.kind == 'video') {
+            else if ((t as any).kind == 'video') {
               element.innerHTML = `<span class="fa fa-video icon-medium"></span>`;
               this.renderer.setStyle(element, 'margin-left', '20px');
             }
@@ -118,18 +118,18 @@ export class ParticipantsComponent implements OnInit {
           const id = `${t.kind}-info-participant-${participant.sid}`;
           let element = document.getElementById(id);
           if (element != null) {
-            if (t.kind == 'audio')
+            if ((t as any).kind == 'audio')
               element.innerHTML = `<span class="fa fa-microphone-slash icon-medium"></span>`;
-            else if (t.kind == 'video')
+            else if ((t as any).kind == 'video')
               element.innerHTML = `<span class="fa fa-video-slash icon-medium"></span>`;
           } else {
             element = document.createElement('div');
             element.id = id;
-            if (t.kind == 'audio') {
+            if ((t as any).kind == 'audio') {
               element.innerHTML = `<span class="fa fa-microphone-slash icon-medium"></span> `;
               this.renderer.setStyle(element, 'margin-left', '50px');
             }
-            else if (t.kind == 'video') {
+            else if ((t as any).kind == 'video') {
               element.innerHTML = `<span class="fa fa-video-slash icon-medium"></span>`;
               this.renderer.setStyle(element, 'margin-left', '20px');
             }

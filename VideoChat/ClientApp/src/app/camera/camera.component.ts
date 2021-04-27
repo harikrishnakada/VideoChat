@@ -25,8 +25,8 @@ export class CameraComponent implements OnInit, AfterViewInit {
   isInitializing: boolean = true;
   activeRoom: Room;
 
-  private videoTrack: LocalVideoTrack;
-  private audioTrack: LocalAudioTrack;
+  public videoTrack: LocalVideoTrack;
+  public audioTrack: LocalAudioTrack;
   private localTracks: LocalTrack[] = [];
 
   componentId = Date.now();
