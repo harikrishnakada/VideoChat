@@ -31,9 +31,9 @@ namespace VideoChat
 
             services.Configure<TwilioSettings>(settings =>
             {
-                settings.AccountSid = Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID");
-                settings.ApiSecret = Environment.GetEnvironmentVariable("TWILIO_API_SECRET");
-                settings.ApiKey = Environment.GetEnvironmentVariable("TWILIO_API_KEY");
+                settings.AccountSid = this.Configuration["TWILIO_ACCOUNT_SID"];
+                settings.ApiSecret = this.Configuration["TWILIO_VIDEO_API_SECRET"];
+                settings.ApiKey = this.Configuration["TWILIO_VIDEO_API_KEY"];
             });
 
             services.AddTransient<IVideoService, VideoService>();
@@ -52,6 +52,9 @@ namespace VideoChat
         {
             if (env.IsDevelopment())
             {
+                var builder = new ConfigurationBuilder();
+                builder.AddUserSecrets<Startup>();
+
                 app.UseDeveloperExceptionPage();
             }
             else
