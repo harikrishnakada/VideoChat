@@ -1,4 +1,4 @@
-<h1>Hello, world!</h1>
+<!--<h1>Hello, world!</h1>
 <div class="grid-container">
   <div class="grid-bottom-right">
     <a href="https://www.twilio.com/video" target="_blank">
@@ -19,5 +19,25 @@
   </div>
   <div class="grid-right">
     <app-settings #settings (settingsChanged)="onSettingsChanged($event)"></app-settings>
+  </div>
+</div>-->
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-3" *ngIf="!activeRoom">
+      <app-rooms #rooms (roomChanged)="onRoomChanged($event)" (roomJoined)="onRoomJoined($event)"
+                 [activeRoomName]="!!activeRoom ? activeRoom.name : null"></app-rooms>
+    </div>
+    <div [ngClass]="!!activeRoom ? 'col-9': 'col-6'">
+      <app-camera #camera [style.display]="!!activeRoom ? 'none' : 'block'"></app-camera>
+      <app-participants #participants
+                        (leaveRoom)="onLeaveRoom($event)"
+                        (participantsChanged)="onParticipantsChanged($event)"
+                        [style.display]="!!activeRoom ? 'block' : 'none'"
+                        [activeRoom]="!!activeRoom ? activeRoom : null"></app-participants>
+    </div>
+    <div class="col-3">
+      <app-settings #settings (settingsChanged)="onSettingsChanged($event)"></app-settings>
+    </div>
   </div>
 </div>

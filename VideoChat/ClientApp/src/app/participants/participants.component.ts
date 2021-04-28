@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
-import { Participant, RemoteAudioTrack, RemoteParticipant, RemoteTrack, RemoteTrackPublication, RemoteVideoTrack, Track } from 'twilio-video';
+import { Participant, RemoteAudioTrack, RemoteParticipant, RemoteTrack, RemoteTrackPublication, RemoteVideoTrack, Room, Track } from 'twilio-video';
 import { VideoChatService } from '../services/videochat.service';
 
 /*
@@ -17,7 +17,7 @@ export class ParticipantsComponent implements OnInit {
   @ViewChild('list', { static: false }) listRef: ElementRef;
   @Output('participantsChanged') participantsChanged = new EventEmitter<boolean>();
   @Output('leaveRoom') leaveRoom = new EventEmitter<boolean>();
-  @Input('activeRoomName') activeRoomName: string;
+  @Input('activeRoom') activeRoom: Room;
 
   get participantCount() {
     return !!this.participants ? this.participants.size : 0;
@@ -150,6 +150,11 @@ export class ParticipantsComponent implements OnInit {
       this.renderer.data.id = track.sid;
       this.renderer.setStyle(element, 'width', '95%');
       this.renderer.setStyle(element, 'margin-left', '2.5%');
+      if (this.participants.size == 1)
+        this.renderer.addClass(element, 'col-12');
+      else
+        this.renderer.addClass(element, 'col-6');
+
       this.renderer.appendChild(this.listRef.nativeElement, element);
       this.participantsChanged.emit(true);
     }
@@ -173,4 +178,5 @@ export class ParticipantsComponent implements OnInit {
       ((track as RemoteAudioTrack).detach !== undefined ||
         (track as RemoteVideoTrack).detach !== undefined);
   }
+
 }

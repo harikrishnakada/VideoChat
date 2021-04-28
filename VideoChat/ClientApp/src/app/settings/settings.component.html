@@ -1,7 +1,28 @@
 <p>settings works!</p>
 <div class="jumbotron">
-  <h4 class="display-4"><i class="fas fa-cogs"></i> Settings</h4>
+  <h4 class="display-4" style="font-size:2.5rem"><i class="fas fa-cogs"></i> Settings</h4>
   <form class="form">
+    <div class="form-group row" *ngIf="activeRoom">
+      <label for="staticRoomName" class="col-sm-4 col-form-label">Room Name</label>
+      <div class="col-sm-7">
+        <input type="text" readonly class="form-control-plaintext" id="staticRoomName" value="{{namedRoom?.name}}">
+      </div>
+      <div class="col-sm-1">
+        <a href="javascript:void(0)" (click)="copyToClipBoard(activeRoom?.name)"><span class="fa fa-copy"></span></a>
+      </div>
+      <label for="staticRoomCode" class="col-sm-4 col-form-label">Room Code</label>
+      <div class="col-sm-7">
+        <input type="text" readonly class="form-control-plaintext" id="staticRoomCode" value="{{namedRoom?.id}}">
+      </div>
+      <div class="col-sm-1">
+        <a href="javascript:void(0)" (click)="copyToClipBoard(activeRoom?.sid)"><span class="fa fa-copy"></span></a>
+      </div>
+      <label for="staticparticipants" class="col-sm-4 col-form-label">Participants</label>
+      <div class="col-sm-7">
+        <input type="text" readonly class="form-control-plaintext" id="staticparticipants" value=" {{ namedRoom?.participantCount }} / {{ namedRoom?.maxParticipants }}">
+      </div>
+    </div>
+
     <div class="form-group" *ngIf="hasAudioInputOptions">
       <app-device-select [kind]="'audioinput'"
                          [label]="'Audio Input Source'" [devices]="devices"

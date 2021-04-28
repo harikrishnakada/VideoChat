@@ -27,10 +27,14 @@ export class VideoChatService {
   $roomsUpdated: Observable<Room>;
   private roomBroadcast = new ReplaySubject<Room>();
 
+  $namedRoomUpdated: Observable<NamedRoom>;
+  private namedRoomBroadcast = new ReplaySubject<NamedRoom>();
+
   notificationHub: HubConnection;
 
   constructor(private readonly http: HttpClient) {
     this.$roomsUpdated = this.roomBroadcast.asObservable();
+    this.$namedRoomUpdated = this.namedRoomBroadcast.asObservable();
   }
 
   async createHub() {
@@ -88,6 +92,19 @@ export class VideoChatService {
 
   nudge(activeRoom) {
     this.roomBroadcast.next(activeRoom);
+  }
+
+  nudgeOnRoomUpdate(room:NamedRoom) {
+    this.namedRoomBroadcast.next(room);
+  }
+
+  copyToClipboard(value: any) {
+    var textArea = document.createElement("textarea");
+    textArea.value = value;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("Copy");
+    textArea.remove();
   }
 
 }

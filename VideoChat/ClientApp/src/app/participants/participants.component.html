@@ -1,4 +1,3 @@
-<p>participants works!</p>
 <div id="participant-list">
   <div id="alone" [ngClass]="{ 'table': isAlone, 'd-none': !isAlone }">
     <p class="text-center text-monospace h3" style="display: table-cell">
@@ -14,11 +13,14 @@
         <li class="nav-item">
           <button type="button" class="btn btn-lg leave-room"
                   title="Click to leave this room." (click)="onLeaveRoom()">
-            Leave "{{ activeRoomName }}" Room?
+            Leave "{{ activeRoom?.name }}" Room?
           </button>
         </li>
       </ul>
     </nav>
-    <div #list></div>
+    <div class="row">
+      <div #list class="col-12">
+      </div>
+    </div>
   </div>
 </div>

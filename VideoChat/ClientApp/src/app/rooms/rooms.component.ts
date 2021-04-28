@@ -76,6 +76,8 @@ export class RoomsComponent implements OnInit {
   async updateRoom(roomSid) {
     var room = (await this.videoChatService.getRoom(roomSid)) as NamedRoom[];
     this.rooms = room;
+
+    this.videoChatService.nudgeOnRoomUpdate(room[0]);
   }
 
   copyToClipboard(room: NamedRoom) {

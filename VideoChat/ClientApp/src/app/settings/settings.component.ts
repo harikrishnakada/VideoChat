@@ -2,9 +2,10 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } 
 import { CameraComponent } from '../camera/camera.component';
 import { DeviceSelectComponent } from './device-select.component';
 import { DeviceService } from '../services/device.service';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { LocalVideoTrack, Room } from 'twilio-video';
+import { NamedRoom, VideoChatService } from '../services/videochat.service';
 
 /**
  There are a few components in play with the concept of settings. We’ll have a camera component beneath several DeviceSelectComponents objects.
@@ -20,6 +21,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
   private devices: MediaDeviceInfo[] = [];
   private subscription: Subscription;
   private videoDeviceId: string;
+
+  namedRoom: NamedRoom;
 
   get hasAudioInputOptions(): boolean {
     return this.devices && this.devices.filter(d => d.kind === 'audioinput').length > 0;
@@ -38,8 +41,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
   @Input() activeRoom: Room;
   @Output() settingsChanged = new EventEmitter<MediaDeviceInfo>();
 
-  screenTrack : LocalVideoTrack;
-  constructor(private readonly deviceService: DeviceService) { }
+  screenTrack: LocalVideoTrack;
+  constructor(private readonly deviceService: DeviceService, private readonly videoChatService: VideoChatService) { }
 
   ngOnInit() {
     this.subscription =
@@ -50,6 +53,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
           this.devices = await deviceListPromise;
           this.handleDeviceAvailabilityChanges();
         });
+
+    this.subscription =
+      this.videoChatService
+        .$namedRoomUpdated
+        .pipe(tap(room => this.namedRoom = room))
+        .subscribe();
   }
 
   ngOnDestroy() {
@@ -154,4 +163,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
   onScreenUnShare() {
     this.activeRoom.localParticipant.unpublishTrack(this.screenTrack);
   }
+
+  public copyToClipBoard(value: any) {
+    this.videoChatService.copyToClipboard(value);
+  }
+
 }
