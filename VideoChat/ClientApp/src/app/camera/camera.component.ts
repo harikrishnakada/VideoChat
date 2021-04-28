@@ -17,6 +17,7 @@ export class CameraComponent implements OnInit, AfterViewInit {
   @ViewChild('preview', { static: false }) previewElement: ElementRef;
   @Output() isVideoOn = new EventEmitter<boolean>();
   @Output() isAudioOn = new EventEmitter<boolean>();
+  @Output() shareScreen = new EventEmitter<boolean>();
 
   get tracks(): LocalTrack[] {
     return this.localTracks;
@@ -116,4 +117,7 @@ export class CameraComponent implements OnInit, AfterViewInit {
     this.isAudioOn.emit(true);
   }
 
+  onScreenShare() {
+    this.shareScreen.emit();
+  }
 }

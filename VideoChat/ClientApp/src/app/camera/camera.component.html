@@ -11,4 +11,7 @@
     <a href="javascript:void(0)" role="button" (click)="stopAudio()" *ngIf="audioTrack.isEnabled"><span class="fa fa-microphone large-icon"></span></a>
     <a href="javascript:void(0)" class="btn-default" (click)="startAudio()" *ngIf="!audioTrack.isEnabled"><span class="fa fa-microphone-slash large-icon"></span></a>
   </div>
+  <div>
+    <button class="btn btn-success" (click)="onScreenShare()">Share Screen</button>
+  </div>
 </div>

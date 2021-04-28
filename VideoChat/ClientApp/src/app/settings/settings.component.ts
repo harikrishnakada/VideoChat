@@ -4,7 +4,7 @@ import { DeviceSelectComponent } from './device-select.component';
 import { DeviceService } from '../services/device.service';
 import { debounceTime } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
-import { Room } from 'twilio-video';
+import { LocalVideoTrack, Room } from 'twilio-video';
 
 /**
  There are a few components in play with the concept of settings. We’ll have a camera component beneath several DeviceSelectComponents objects.
@@ -38,6 +38,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   @Input() activeRoom: Room;
   @Output() settingsChanged = new EventEmitter<MediaDeviceInfo>();
 
+  screenTrack : LocalVideoTrack;
   constructor(private readonly deviceService: DeviceService) { }
 
   ngOnInit() {
@@ -134,5 +135,23 @@ export class SettingsComponent implements OnInit, OnDestroy {
       this.activeRoom.localParticipant.audioTracks.forEach(track => {
         track.track.enable();
       });
+  }
+
+  async OnScreenShare() {
+    let _self = this;
+    if (this.activeRoom) {
+      //getDisplayMedia works only for chrome browsers.
+      const stream = await (navigator.mediaDevices as any).getDisplayMedia();
+      this.screenTrack = new LocalVideoTrack(stream.getTracks()[0]);
+      this.activeRoom.localParticipant.publishTrack(this.screenTrack);
+
+      stream.getVideoTracks()[0].onended = function () {
+        _self.onScreenUnShare()
+      };
+    }
+  }
+
+  onScreenUnShare() {
+    this.activeRoom.localParticipant.unpublishTrack(this.screenTrack);
   }
 }

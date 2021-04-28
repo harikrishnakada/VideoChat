@@ -19,6 +19,6 @@
     </div>
   </form>
   <div [style.display]="isPreviewing ? 'block' : 'none'">
-    <app-camera #camera (isVideoOn)="onVideoSettingChanged($event)" (isAudioOn)="onAudioSettingChanged($event)"></app-camera>
+    <app-camera #camera (isVideoOn)="onVideoSettingChanged($event)" (isAudioOn)="onAudioSettingChanged($event)" (shareScreen)="OnScreenShare()"></app-camera>
   </div>
 </div>
