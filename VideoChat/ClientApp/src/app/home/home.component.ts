@@ -51,7 +51,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   async onLeaveRoom(_: boolean) {
     if (this.activeRoom) {
-      this.rooms.rooms.splice(this.rooms.rooms.findIndex(x => x.id == this.activeRoom.sid), 1)
+      //this.rooms.rooms.splice(this.rooms.rooms.findIndex(x => x.id == this.activeRoom.sid), 1)
       this.activeRoom.disconnect();
       this.activeRoom = null;
     }
